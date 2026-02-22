@@ -6,6 +6,7 @@ import {
 import { eventsHandler } from "./handlers/events";
 import { kafkaStatsHandler } from "./handlers/kafka-stats";
 import { sseHandler } from "./handlers/sse";
+import { dbTablesHandler } from "./handlers/db-tables";
 
 type Handler = (
   req: Request,
@@ -53,6 +54,7 @@ const routes: Route[] = [
   route("GET", "/events", eventsHandler),
   route("GET", "/kafka/stats", kafkaStatsHandler),
   route("GET", "/stream", sseHandler),
+  route("GET", "/db/tables", dbTablesHandler),
 ];
 
 export function router(req: Request): Response | Promise<Response> {

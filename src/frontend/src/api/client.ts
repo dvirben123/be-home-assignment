@@ -32,3 +32,11 @@ export async function fetchRecentEvents(opts?: {
 export function getSSEUrl(): string {
   return `${BASE}/stream`;
 }
+
+export async function fetchDbTables(): Promise<{
+  tables: Record<string, Record<string, unknown>[]>;
+  fetchedAt: string;
+}> {
+  const res = await fetch(`${BASE}/db/tables`);
+  return res.json();
+}

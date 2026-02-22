@@ -6,6 +6,7 @@ import { LiveEventStreamPanel } from "./components/panels/LiveEventStreamPanel";
 import { CorrelationFlowPanel } from "./components/panels/CorrelationFlowPanel";
 import { RecentScoresPanel } from "./components/panels/RecentScoresPanel";
 import { QueryToolPanel } from "./components/panels/QueryToolPanel";
+import { DatabaseView } from "./components/DatabaseView";
 import type {
   SSEMessage,
   SSEKafkaStats,
@@ -19,6 +20,7 @@ const MAX_SCORES = 20;
 const MAX_FLOWS = 10;
 
 export default function App() {
+  const [activeView, setActiveView] = useState<"live" | "database">("live");
   const [kafkaStats, setKafkaStats] = useState<SSEKafkaStats | null>(null);
   const [liveEvents, setLiveEvents] = useState<LiveEvent[]>([]);
   const [flows, setFlows] = useState<Map<string, CorrelationFlow>>(new Map());
@@ -125,11 +127,35 @@ export default function App() {
     <div className="h-screen bg-gray-950 text-white overflow-hidden flex flex-col">
       {/* Header */}
       <header className="shrink-0 px-4 py-2 border-b border-gray-800 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-indigo-500" />
-          <span className="text-sm font-semibold text-gray-200 tracking-wide">
-            Chargeflow Risk Engine
-          </span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-indigo-500" />
+            <span className="text-sm font-semibold text-gray-200 tracking-wide">
+              Chargeflow Risk Engine
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setActiveView("live")}
+              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                activeView === "live"
+                  ? "bg-indigo-600 text-white"
+                  : "text-gray-400 hover:text-gray-200 hover:bg-gray-800"
+              }`}
+            >
+              Live
+            </button>
+            <button
+              onClick={() => setActiveView("database")}
+              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                activeView === "database"
+                  ? "bg-indigo-600 text-white"
+                  : "text-gray-400 hover:text-gray-200 hover:bg-gray-800"
+              }`}
+            >
+              Database
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-4 text-xs text-gray-500">
           <span>
@@ -151,48 +177,54 @@ export default function App() {
         </div>
       </header>
 
-      {/* 3×2 Dashboard Grid */}
-      <div
-        className="flex-1 grid gap-2 p-2 overflow-hidden"
-        style={{
-          gridTemplateColumns: "1fr 1.5fr 1fr",
-          gridTemplateRows: "1fr 1fr",
-        }}
-      >
-        {/* Row 1, Col 1 — Kafka Stats */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 overflow-hidden">
-          <KafkaStatsPanel
-            stats={kafkaStats}
-            connectionState={connectionState}
-          />
+      {activeView === "database" ? (
+        <div className="flex-1 p-4 overflow-hidden flex flex-col">
+          <DatabaseView />
         </div>
-
-        {/* Row 1, Col 2 — Live Event Stream */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 overflow-hidden">
-          <LiveEventStreamPanel events={liveEvents} />
-        </div>
-
-        {/* Row 1, Col 3 — Correlation Flow */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 overflow-hidden">
-          <CorrelationFlowPanel flows={sortedFlows} />
-        </div>
-
-        {/* Row 2, Col 1+2 — Recent Scores */}
+      ) : (
+        /* 3×2 Dashboard Grid */
         <div
-          className="bg-gray-900 border border-gray-800 rounded-xl p-4 overflow-hidden"
-          style={{ gridColumn: "1 / 3" }}
+          className="flex-1 grid gap-2 p-2 overflow-hidden"
+          style={{
+            gridTemplateColumns: "1fr 1.5fr 1fr",
+            gridTemplateRows: "1fr 1fr",
+          }}
         >
-          <RecentScoresPanel
-            scores={recentScores}
-            onSelect={setSelectedScore}
-          />
-        </div>
+          {/* Row 1, Col 1 — Kafka Stats */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 overflow-hidden">
+            <KafkaStatsPanel
+              stats={kafkaStats}
+              connectionState={connectionState}
+            />
+          </div>
 
-        {/* Row 2, Col 3 — Query Tool */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 overflow-hidden">
-          <QueryToolPanel prefill={selectedScore} />
+          {/* Row 1, Col 2 — Live Event Stream */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 overflow-hidden">
+            <LiveEventStreamPanel events={liveEvents} />
+          </div>
+
+          {/* Row 1, Col 3 — Correlation Flow */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 overflow-hidden">
+            <CorrelationFlowPanel flows={sortedFlows} />
+          </div>
+
+          {/* Row 2, Col 1+2 — Recent Scores */}
+          <div
+            className="bg-gray-900 border border-gray-800 rounded-xl p-4 overflow-hidden"
+            style={{ gridColumn: "1 / 3" }}
+          >
+            <RecentScoresPanel
+              scores={recentScores}
+              onSelect={setSelectedScore}
+            />
+          </div>
+
+          {/* Row 2, Col 3 — Query Tool */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 overflow-hidden">
+            <QueryToolPanel prefill={selectedScore} />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
