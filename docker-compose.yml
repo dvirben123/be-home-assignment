@@ -99,6 +99,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+      init-kafka:
+        condition: service_completed_successfully
     ports:
       - "3001:3001"
     environment:
@@ -113,11 +115,24 @@ services:
       POSTGRES_USER: chargeflow
       POSTGRES_PASSWORD: chargeflow
       POSTGRES_DB: chargeflow
+      SCORE_TTL_HOURS: "24"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health >/dev/null 2>&1"]
+      test: ["CMD-SHELL", "bun -e \"fetch('http://localhost:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 15s
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: ./src/services/dashboard/Dockerfile
+    container_name: dashboard
+    depends_on:
+      risk-engine:
+        condition: service_healthy
+    ports:
+      - "5173:80"
 
 volumes:
   postgres_data:
