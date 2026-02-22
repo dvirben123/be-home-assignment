@@ -126,7 +126,7 @@ services:
   dashboard:
     build:
       context: .
-      dockerfile: ./src/services/dashboard/Dockerfile
+      dockerfile: ./src/frontend/Dockerfile
     container_name: dashboard
     depends_on:
       risk-engine:

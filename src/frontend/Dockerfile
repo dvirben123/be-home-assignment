@@ -3,15 +3,15 @@ FROM oven/bun:latest AS builder
 
 WORKDIR /app
 
-COPY src/services/dashboard/package.json ./package.json
+COPY src/frontend/package.json ./package.json
 RUN bun install
 
-COPY src/services/dashboard/index.html ./index.html
-COPY src/services/dashboard/vite.config.ts ./vite.config.ts
-COPY src/services/dashboard/tsconfig.json ./tsconfig.json
-COPY src/services/dashboard/tailwind.config.js ./tailwind.config.js
-COPY src/services/dashboard/postcss.config.js ./postcss.config.js
-COPY src/services/dashboard/src ./src
+COPY src/frontend/index.html ./index.html
+COPY src/frontend/vite.config.ts ./vite.config.ts
+COPY src/frontend/tsconfig.json ./tsconfig.json
+COPY src/frontend/tailwind.config.js ./tailwind.config.js
+COPY src/frontend/postcss.config.js ./postcss.config.js
+COPY src/frontend/src ./src
 
 RUN bun run build
 
@@ -19,7 +19,7 @@ RUN bun run build
 FROM nginx:alpine AS runner
 
 COPY --from=builder /app/dist /usr/share/nginx/html
-COPY src/services/dashboard/nginx.conf /etc/nginx/conf.d/default.conf
+COPY src/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
